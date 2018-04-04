@@ -1,3 +1,18 @@
+
+<!--This is Clic Clicker. The goal of the game is to acquire as many clicks
+as possible. The player can get clicks by clicking the "CLICK ME" button.
+The player can also purchase automated clickers by spending players clicks.
+These automated clickers grant more clicks everysecond and the amount is
+determined by the clickertype. Clicker gives +1 clicks per second,
+megaclicker gives +3 clicks per second and ultraclicker gives +6 clicks per
+second. The player can also enhance his own clicks and get +1 for every clicks
+via the "Enhance your clicks" button. The game also shows basic statistics for
+the player.
+
+With "Submit your score" button the player can submit their score (current
+clicks) to the service. With "Save your game" button the player can save
+the current state of the game and with "Load game" button load that state.-->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,6 +25,9 @@
   $(document).ready( function() {
     "use strict";
 
+    //All the variables that the game uses.
+
+    //Clicks work as the "currency" of the game.
     var clicks = 0;
     var alltimeclicks = 0;
 
@@ -21,11 +39,11 @@
     var clickers = 0;
     var clicker_price = 20;
 
-    //gives +2 clicks per second
+    //gives +3 clicks per second
     var megaclickers = 0;
     var megaclicker_price = 50;
 
-    //gives +4 clicks per second
+    //gives +6 clicks per second
     var ultraclickers = 0;
     var ultraclicker_price = 100;
 
@@ -61,6 +79,7 @@
       window.parent.postMessage(msg, "*");
     });
 
+    //The game sends a load request to the service.
     $("#load").click( function () {
       var msg = {
         "messageType": "LOAD_REQUEST",
@@ -68,8 +87,13 @@
       window.parent.postMessage(msg, "*");
     });
 
+    //Event listener listens signals that the service sends for the game.
+    //Messagetype LOAD loads a gamestate from the service.
+    //Messagetype ERROR handles errors from the service and shows them as alerts.
     window.addEventListener("message", function(evt) {
       if(evt.data.messageType === "LOAD") {
+
+        //Sets the gamestate
         clicks = evt.data.gameState.clicks;
         alltimeclicks = evt.data.gameState.alltimeclicks;
         clicks_for_click = evt.data.gameState.clicks_for_click;
@@ -83,6 +107,7 @@
         ultraclicker_price = evt.data.gameState.ultraclicker_price;
         total_clickers = evt.data.gameState.total_clickers;
 
+        //Updates the fields with correct info
         $("#clickslabel").text(clicks);
         $("#alltimeclicks").text("Alltime clicks: " + alltimeclicks);
         $("#total_clickers").text("Total clickers owned: " + total_clickers);
@@ -108,6 +133,7 @@
       $("#alltimeclicks").text("Alltime clicks: " + alltimeclicks);
     }, 1000);
 
+    //Gives the player more clicks
     $("#clickme").click(function () {
       clicks = clicks + clicks_for_click;
       alltimeclicks += clicks_for_click;
@@ -116,11 +142,13 @@
       $("#notification").text("");
     });
 
+    //Automated basic clicker that gives +1 clicks per second
     $("#buy_clicker").click(function () {
       if ( clicks >= clicker_price ) {
         clickers ++;
         clicks_per_second ++;
         clicks -= clicker_price;
+        //The price of clickers increase logarithmically
         clicker_price = Math.floor(clicker_price + Math.log(clicker_price));
         total_clickers ++;
         $("#total_clickers").text("Total clickers owned: " + total_clickers);
@@ -134,11 +162,13 @@
       }
     });
 
+    //Automated megaclikcer that gives +3 clicks per second.
     $("#buy_megaclicker").click(function () {
       if ( clicks >= megaclicker_price) {
         megaclickers ++;
-        clicks_per_second  = clicks_per_second + 2
+        clicks_per_second  = clicks_per_second + 3;
         clicks -= megaclicker_price;
+        //The price of megaclickers increase logarithmically*2
         megaclicker_price = Math.floor(megaclicker_price + 2*Math.log(megaclicker_price));
         total_clickers ++;
         $("#total_clickers").text("Total clickers owned: " + total_clickers);
@@ -152,11 +182,13 @@
       }
     });
 
+    //Automated ultraclicker that gives +6 clicks per second.
     $("#buy_ultraclicker").click(function () {
       if ( clicks >= ultraclicker_price ) {
         ultraclickers ++;
-        clicks_per_second  = clicks_per_second + 4;
+        clicks_per_second  = clicks_per_second + 6;
         clicks -= ultraclicker_price;
+        //The price of ultraclickers increase logarithmically*3.
         ultraclicker_price = Math.floor(ultraclicker_price + 3*Math.log(ultraclicker_price));
         total_clickers ++;
         $("#total_clickers").text("Total clickers owned: " + total_clickers);
@@ -169,10 +201,13 @@
         $("#notification").text("GET MORE CLICKS!!!")
       }
     });
+
+    //This gives the player clicks +1
     $("#buy_extraclicks").click(function (){
       if (clicks >= click_price){
         clicks_for_click ++;
         clicks -= click_price;
+        //The price increases logarithmically*100
         click_price = Math.floor(click_price + 100*Math.log(click_price));
         $("#click_price").text("Price: " + click_price);
         $("#clickslabel").text(clicks);
@@ -214,7 +249,7 @@
       <td><p>Ultraclickers</p></td>
     </tr>
     <tr>
-      <td><button id="buy_extraclicks">Enchance your clicks by one!</button></td>
+      <td><button id="buy_extraclicks">Enhance your clicks by one!</button></td>
       <td><span id="click_price">Price: 1000</span></td>
       <td><span id="clicks_for_click">1</span></td>
       <td><p>Clicks per click</p></td>
@@ -237,6 +272,7 @@
       <td><span id="total_clickers">Total clickers owned: 0</span></td>
   </table>
 
+  <!-- These buttons trigger postMessage messages -->
   <button id="submit_score">Submit score (your current clicks)</button>
   <button id="save">Save your game</button>
   <button id="load">Load game</button>
