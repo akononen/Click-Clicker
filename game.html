@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Click Clicker</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script>
+
+  $(document).ready( function() {
+    "use strict";
+
+    var clicks = 0;
+    var alltimeclicks = 0;
+
+    var clicks_for_click = 1;
+    var click_price = 1000;
+    var clicks_per_second = 0;
+
+    //gives +1 clicks per second
+    var clickers = 0;
+    var clicker_price = 20;
+
+    //gives +2 clicks per second
+    var megaclickers = 0;
+    var megaclicker_price = 50;
+
+    //gives +4 clicks per second
+    var ultraclickers = 0;
+    var ultraclicker_price = 100;
+
+    var total_clickers = 0;
+
+    //player can submit their current clicks as their score
+    $("#submit_score").click( function () {
+      var msg = {
+        "messageType": "SCORE",
+        "score": parseFloat($("#clickslabel").text())
+      };
+      window.parent.postMessage(msg, "*");
+    });
+    //sends a gamestate to the sercice.
+    $("#save").click( function () {
+      var msg = {
+        "messageType": "SAVE",
+        "gameState": {
+          "clicks": clicks,
+          "alltimeclicks": alltimeclicks,
+          "clicks_for_click": clicks_for_click,
+          "click_price": click_price,
+          "clicks_per_second": clicks_per_second,
+          "clickers": clickers,
+          "clicker_price": clicker_price,
+          "megaclickers": megaclickers,
+          "megaclicker_price": megaclicker_price,
+          "ultraclickers": ultraclicker,
+          "ultraclicker_price": ultraclicker_price,
+          "total_clickers": total_clickers,
+        }
+      };
+      window.parent.postMessage(msg, "*");
+    });
+
+    $("#load").click( function () {
+      var msg = {
+        "messageType": "LOAD_REQUEST",
+      };
+      window.parent.postMessage(msg, "*");
+    });
+
+    window.addEventListener("message", function(evt) {
+      if(evt.data.messageType === "LOAD") {
+        clicks = evt.data.gameState.clicks;
+        alltimeclicks = evt.data.gameState.alltimeclicks;
+        clicks_for_click = evt.data.gameState.clicks_for_click;
+        click_price = evt.data.gameState.click_price;
+        clicks_per_second = evt.data.gameState.clicks_per_second;
+        clickers = evt.data.gameState.clickers;
+        clicker_price = evt.data.gameState.clicker_price;
+        megaclickers = evt.data.gameState.megaclickers;
+        megaclicker_price = evt.data.gameState.megaclicker_price;
+        ultraclickers = evt.data.gameState.ultraclickers;
+        ultraclicker_price = evt.data.gameState.ultraclicker_price;
+        total_clickers = evt.data.gameState.total_clickers;
+
+        $("#clickslabel").text(clicks);
+        $("#alltimeclicks").text("Alltime clicks: " + alltimeclicks);
+        $("#total_clickers").text("Total clickers owned: " + total_clickers);
+        $("#clickers").text(clickers);
+        $("#clicker_price").text("Price: " + clicker_price);
+        $("#megaclickers").text(megaclickers);
+        $("#megaclicker_price").text("Price: " + megaclicker_price);
+        $("#ultraclickers").text(ultraclickers);
+        $("#ultraclicker_price").text("Price: " + ultraclicker_price);
+        $("#clicks_per_secondLabel").text("Clicks per second: " + clicks_per_second);
+
+      } else if (evt.data.messageType === "ERROR") {
+        alert(evt.data.info);
+      }
+    });
+    //Actual functionalities of the game.
+
+    //Updates the clicks field every second.
+    window.setInterval(function(){
+      clicks += clicks_per_second;
+      alltimeclicks += clicks_per_second;
+      $("#clickslabel").text(clicks);
+      $("#alltimeclicks").text("Alltime clicks: " + alltimeclicks);
+    }, 1000);
+
+    $("#clickme").click(function () {
+      clicks = clicks + clicks_for_click;
+      alltimeclicks += clicks_for_click;
+      $("#alltimeclicks").text("Alltime clicks: " + alltimeclicks);
+      $("#clickslabel").text(clicks);
+      $("#notification").text("");
+    });
+
+    $("#buy_clicker").click(function () {
+      if ( clicks >= clicker_price ) {
+        clickers ++;
+        clicks_per_second ++;
+        clicks -= clicker_price;
+        clicker_price = Math.floor(clicker_price + Math.log(clicker_price));
+        total_clickers ++;
+        $("#total_clickers").text("Total clickers owned: " + total_clickers);
+        $("#clicker_price").text("Price: " + clicker_price);
+        $("#clickslabel").text(clicks);
+        $("#clickers").text(clickers);
+        $("#clicks_per_secondLabel").text("Clicks per second: " + clicks_per_second);
+        $("#notification").text("");
+      } else {
+        $("#notification").text("GET MORE CLICKS!!!");
+      }
+    });
+
+    $("#buy_megaclicker").click(function () {
+      if ( clicks >= megaclicker_price) {
+        megaclickers ++;
+        clicks_per_second  = clicks_per_second + 2
+        clicks -= megaclicker_price;
+        megaclicker_price = Math.floor(megaclicker_price + 2*Math.log(megaclicker_price));
+        total_clickers ++;
+        $("#total_clickers").text("Total clickers owned: " + total_clickers);
+        $("#megaclicker_price").text("Price: " + megaclicker_price);
+        $("#clickslabel").text(clicks);
+        $("#megaclickers").text(megaclickers);
+        $("#clicks_per_secondLabel").text("Clicks per second: " + clicks_per_second);
+        $("#notification").text("");
+      } else {
+        $("#notification").text("GET MORE CLICKS!!!");
+      }
+    });
+
+    $("#buy_ultraclicker").click(function () {
+      if ( clicks >= ultraclicker_price ) {
+        ultraclickers ++;
+        clicks_per_second  = clicks_per_second + 4;
+        clicks -= ultraclicker_price;
+        ultraclicker_price = Math.floor(ultraclicker_price + 3*Math.log(ultraclicker_price));
+        total_clickers ++;
+        $("#total_clickers").text("Total clickers owned: " + total_clickers);
+        $("#ultraclicker_price").text("Price: " + ultraclicker_price);
+        $("#clickslabel").text(clicks);
+        $("#ultraclickers").text(ultraclickers);
+        $("#clicks_per_secondLabel").text("Clicks per second: " + clicks_per_second);
+        $("#notification").text("");
+      } else {
+        $("#notification").text("GET MORE CLICKS!!!")
+      }
+    });
+    $("#buy_extraclicks").click(function (){
+      if (clicks >= click_price){
+        clicks_for_click ++;
+        clicks -= click_price;
+        click_price = Math.floor(click_price + 100*Math.log(click_price));
+        $("#click_price").text("Price: " + click_price);
+        $("#clickslabel").text(clicks);
+        $("#clicks_for_click").text(clicks_for_click);
+        $("#notification").text("");
+      } else {
+        $("#notification").text("GET MORE CLICKS!!!")
+      }
+    })
+  });
+  </script>
+</head>
+
+<body>
+  <!-- Table containing the buttons and labels for the game. -->
+  <table style="width:100%">
+    <tr>
+      <td><button id="clickme">CLICK ME!</button></td>
+      <td><span></span></td>
+      <td><b><span id="clickslabel">0</span></b></td>
+      <td><p>Clicks</p></td>
+    </tr>
+    <tr>
+      <td><button id="buy_clicker">Buy clicker</button></td>
+      <td><span id="clicker_price">Price: 20</span></td>
+      <td><span id="clickers">0</span></td>
+      <td><p>Clickers</p></td>
+    </tr>
+    <tr>
+      <td><button id="buy_megaclicker">Buy megaclicker</button></td>
+      <td><span id="megaclicker_price">Price: 50</span></td>
+      <td><span id="megaclickers">0</span></td>
+      <td><p>Megaclickers</p></td>
+    </tr>
+    <tr>
+      <td><button id="buy_ultraclicker">Buy ultraclicker</button></td>
+      <td><span id="ultraclicker_price">Price: 100</span></td>
+      <td><span id="ultraclickers">0</span></td>
+      <td><p>Ultraclickers</p></td>
+    </tr>
+    <tr>
+      <td><button id="buy_extraclicks">Enchance your clicks by one!</button></td>
+      <td><span id="click_price">Price: 1000</span></td>
+      <td><span id="clicks_for_click">1</span></td>
+      <td><p>Clicks per click</p></td>
+    </tr>
+  </table>
+
+  <!--Paragraph used to notify the player on certain events. -->
+  <p id="notification"></p>
+
+  <!-- Table containing statistics-->
+  <p><b>Statistics</b></p>
+  <table style="width:50%">
+    <tr>
+      <td><span id="alltimeclicks">Alltime clicks: 0</span></td>
+    </tr>
+    <tr>
+      <td><span id="clicks_per_secondLabel">Clicks per second: 0</span></td>
+    </tr>
+    <tr>
+      <td><span id="total_clickers">Total clickers owned: 0</span></td>
+  </table>
+
+  <button id="submit_score">Submit score (your current clicks)</button>
+  <button id="save">Save your game</button>
+  <button id="load">Load game</button>
+
+</body>
+</html>
