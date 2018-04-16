@@ -71,7 +71,7 @@ the current state of the game and with "Load game" button load that state.-->
           "clicker_price": clicker_price,
           "megaclickers": megaclickers,
           "megaclicker_price": megaclicker_price,
-          "ultraclickers": ultraclicker,
+          "ultraclickers": ultraclickers,
           "ultraclicker_price": ultraclicker_price,
           "total_clickers": total_clickers,
         }
@@ -217,6 +217,17 @@ the current state of the game and with "Load game" button load that state.-->
         $("#notification").text("GET MORE CLICKS!!!")
       }
     })
+    
+    // Request the service to set the resolution of the
+    // iframe correspondingly
+    var message =  {
+      messageType: "SETTING",
+      options: {
+      	"width": 700, //Integer
+        "height": 300 //Integer
+        }
+    };
+    window.parent.postMessage(message, "*");
   });
   </script>
 </head>
